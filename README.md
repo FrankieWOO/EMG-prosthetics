@@ -1,1 +1,1 @@
-# EMG_prosthetics
+# EMG-prosthetics
