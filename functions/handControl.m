@@ -1,6 +1,6 @@
 classdef handControl < handle
     % real-time EMG acquisition and hand control
-    
+    % created by Fan on 2/2/2017
     properties
         dataFeed;   % datafeed object, e.g. Bitalino
         timerObj;   % timer object

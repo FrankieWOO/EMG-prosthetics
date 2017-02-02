@@ -1,5 +1,6 @@
 function [ emg ] = adc2emg( adc )
-%ADC2EMG convert raw ADC data to EMG (mV)
+%   ADC2EMG convert raw ADC data to EMG (mV)
+%   created by Fan on 1/2/2017
 %   VCC: operating voltage
 %   sensor_gain
     VCC = 3.3;
