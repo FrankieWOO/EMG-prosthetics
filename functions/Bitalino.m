@@ -50,8 +50,9 @@ classdef Bitalino < handle
             %
             % MACIdList = Bitalino.findDevices
             availableBTDevices = instrhwinfo('Bluetooth');
-            inds = strcmpi(availableBTDevices.RemoteNames,'bitalino');
-            availableDevices = availableBTDevices.RemoteIDs(inds);
+            findbita = cellfun(@(x) isempty(strfind(x,'BITalino')),availableBTDevices.RemoteNames,...
+                'UniformOutput',false);
+            availableDevices = availableBTDevices.RemoteNames(cell2mat(findbita)==0);
         end
     end
     
