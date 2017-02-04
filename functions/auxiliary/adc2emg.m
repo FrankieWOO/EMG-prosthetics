@@ -7,4 +7,3 @@ function [ emg ] = adc2emg( adc )
     sensor_gain = 1000;
     emg = (adc/1023 - 0.5)*VCC*1000/sensor_gain;
 end
-
