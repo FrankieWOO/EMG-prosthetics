@@ -114,7 +114,7 @@ classdef handControl < handle
             % use classifier to output gesture class
             emgData = [obj.ch1Data obj.ch2Data obj.ch3Data obj.ch4Data];
             class_predict = classifierObj.recognize(emgData);
-
+            
             % if the event of gesture changing happens, trigger the event
             % to send command to serial port; or use another timer to
             % execute command

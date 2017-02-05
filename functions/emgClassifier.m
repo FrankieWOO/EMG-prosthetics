@@ -58,6 +58,16 @@ classdef emgClassifier < handle
         function features = extractFeatures(sample)
             % include different feature extraction methods here.
             % 
+            method = 1;
+            switch method
+                case 1
+                    % mean of absolute
+                    features = mean(abs(sample),1);
+                case 2
+                    % rms: root mean square, usually provide amplitude
+                    % information
+                    features = mean(sample.^2,1).^0.5;
+            end
             
         end
         function trainData = importTrainData(userName)
