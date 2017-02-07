@@ -30,6 +30,12 @@ classdef handControl < handle
             % create serialport object
             obj.serialObj = serial('COM9');
         end
+        function delete(obj)
+            delete(obj.dataFeed);
+            delete(obj.serialObj);
+            delete(timerObj);
+            
+        end
         
         function initializeReading(obj)
             try
