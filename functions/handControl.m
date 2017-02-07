@@ -33,13 +33,13 @@ classdef handControl < handle
         function delete(obj)
             delete(obj.dataFeed);
             delete(obj.serialObj);
-            delete(timerObj);
+            delete(Obj.timerObj);
             
         end
         
         function initializeReading(obj)
             try
-                obj.dataFeed = Bitalino('BITalino-15-23');
+                obj.dataFeed = Bitalino('BITalino-15-11');
                 disp('Connection to Bitalino established')
             catch
                 error('Connection to Bitalino failed!');
@@ -121,8 +121,8 @@ classdef handControl < handle
             % use classifier to output gesture class
             emgData = [obj.ch1Data obj.ch2Data obj.ch3Data obj.ch4Data];
             
-            %class_predict = classifierObj.recognize(emgData);
-            class_predict = 1;
+            class_predict = classifierObj.recognize(emgData);
+            
             % if the event of gesture changing happens, trigger the event
             % to send command to serial port; or use another timer to
             % execute command

@@ -41,38 +41,38 @@ classdef emgClassifier < handle
                 features{i} = cellfun(@extractFeatures,samples{i});
             end
             
-           ffist = features{1,1};
-           fpoint = features{2,1};
-           fwristf = features{3,1};
-           fwriste = features{4,1};
+            ffist = features{1,1};
+            fpoint = features{2,1};
+            fwristf = features{3,1};
+            fwriste = features{4,1};
            
            % We keep Channel 1-4
-           ffist = ffist(:,2:5);
-           fpoint = fpoint(:,2:5);
-           fwristf = fwristf(:,2:5);
-           fwriste = fwriste(:,2:5);
+            ffist = ffist(:,2:5);
+            fpoint = fpoint(:,2:5);
+            fwristf = fwristf(:,2:5);
+            fwriste = fwriste(:,2:5);
            
-           lf=height(ffist);
-           lp= height(fpoint);
-           lwf= height(fwristf);
-           lwe= height(fwriste);
+            lf=height(ffist);
+            lp= height(fpoint);
+            lwf= height(fwristf);
+            lwe= height(fwriste);
            
-           X=[ffist;fpoint;fwristf;fwriste];
-           labels = [ones(lf,1);2*ones(lp,1);3*ones(lwf,1);4*ones(lwe,1)];
+            X=[ffist;fpoint;fwristf;fwriste];
+            labels = [ones(lf,1);2*ones(lp,1);3*ones(lwf,1);4*ones(lwe,1)];
            
-           gamma=1;
-           C=1;
+            gamma=1;
+            C=1;
            
-           T=templateSVM('KernelFunction','gaussian','Standardize' ,true,'KernelScale',gamma,'BoxConstraint',C);
-           SVMModel=fitcecoc(Xtrain,labels,'Coding','onevsone','Learners',T);
-           
+            T=templateSVM('KernelFunction','gaussian','Standardize' ,true,'KernelScale',gamma,'BoxConstraint',C);
+            SVMModel=fitcecoc(Xtrain,labels,'Coding','onevsone','Learners',T);
+            
         end
         
         function resClass = recognize(obj,emgData)
             % window for computing features
-            window = 500;
-            if ( size(emgData,1) > 500 )
-                emgData = emgData(end:end-window+1,:);
+            window = 200;
+            if ( size(emgData,1) > window )
+                emgData = emgData(end-window+1:end,:);
             end
             feature = emgClassifier.extractFeatures(emgData);
             resClass = predict(obj.model,feature);
@@ -97,10 +97,10 @@ classdef emgClassifier < handle
             
         end
         function trainData = importTrainData(userName)
-            filepath1 = ['\functions\fist.xlsx'];
-            filepath2 = ['\functions\point.xlsx'];
-            filepath3 = ['\functions\wrist_flex.xlsx'];
-            filepath4 = ['\functions\wrist_extend.xlsx'];
+            filepath1 = ['/data/' userName '/fist.csv'];
+            filepath2 = ['/data/' userName '/point.csv'];
+            filepath3 = ['/data/' userName '/wrist_flex.csv'];
+            filepath4 = ['/data/' userName '/wrist_extend.csv'];
             % the data file should be csv file whose first line are
             % variable names, which are seqN, channel1, channel2, channel3 and
             % channel4. seqN will be read as row names
@@ -111,7 +111,8 @@ classdef emgClassifier < handle
             trainData = {data1;data2;data3;data4};
         end
         function model = loadModel(userName)
-            model = load(['/data/' userName '/model/SVMmodel.mat']);
+            read = load(['/data/' userName '/model/SVMmodel.mat']);
+            model = read.SVMModel;
         end
     end
     
