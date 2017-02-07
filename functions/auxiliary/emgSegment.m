@@ -5,8 +5,8 @@ function [ segments ] = emgSegment( data )
 %   created by Fan on 4/2/2017
 %   segmentation method refers to Wang2007, An Adaptive Feature Extractor
 %   for Gesture SEMG Recognition
-    window = 30;    %sliding window for moving average
-    thredshold = 0.1;   %thredshold value to select segment
+    window = 50;    %sliding window for moving average
+    thredshold = 0.0001;   %thredshold value to select segment
     
     if (istable(data))
         data_mat = table2array(data);
@@ -45,4 +45,12 @@ function [ segments ] = emgSegment( data )
     for j=1:nSample
        segments{j} =  data_mat(ind_start(j):ind_end(j),:);
     end
+    l=length(segments);
+    
+    for m=l:-1:1
+        if (size(segments{m},1)<900)
+        segments(m)=[];
+        end
+    end
+    
 end
