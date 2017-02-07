@@ -35,55 +35,63 @@ classdef emgClassifier < handle
 %             samples2 = emgSegment(data2);
 %             samples3 = emgSegment(data3);
 %             samples4 = emgSegment(data4);
-            samples = cellfun(@emgSegment,trainData);
+            samples = cellfun(@emgSegment,trainData,'UniformOutput',false);
             features = cell(size(samples));
             for i = 1:length(features)
-                features{i} = cellfun(@extractFeatures,samples{i});
+                features{i,1} = cellfun(@emgClassifier.efeatures,samples{i,1},'UniformOutput',false);
             end
             
-            ffist = features{1,1};
-            fpoint = features{2,1};
-            fwristf = features{3,1};
-            fwriste = features{4,1};
+           ffist = features{1,1};
+           fpoint = features{2,1};
+           fwristf = features{3,1};
+           fwriste = features{4,1};
            
-           % We keep Channel 1-4
-            ffist = ffist(:,2:5);
-            fpoint = fpoint(:,2:5);
-            fwristf = fwristf(:,2:5);
-            fwriste = fwriste(:,2:5);
+           lf=size(ffist,1);
+           lp= size(fpoint,1);
+           lwf= size(fwristf,1);
+           lwe= size(fwriste,1);
            
-            lf=height(ffist);
-            lp= height(fpoint);
-            lwf= height(fwristf);
-            lwe= height(fwriste);
+           for i=1:lf
+           Tffist(i,:)=ffist{i,1};
+           end
+           for i=1:lp
+           Tfpoint(i,:)=fpoint{i,1};
+           end
+           for i=1:lwf
+           Tfwristf(i,:)=fwristf{i,1};
+           end
+           for i=1:lwe
+           Tfwriste(i,:)=fwriste{i,1};
+           end
            
-            X=[ffist;fpoint;fwristf;fwriste];
-            labels = [ones(lf,1);2*ones(lp,1);3*ones(lwf,1);4*ones(lwe,1)];
+           X=[Tffist;Tfpoint;Tfwristf;Tfwriste];
+           labels = [ones(lf,1);2*ones(lp,1);3*ones(lwf,1);4*ones(lwe,1)];
            
-            gamma=1;
-            C=1;
+           gamma=1;
+           C=1;
            
-            T=templateSVM('KernelFunction','gaussian','Standardize' ,true,'KernelScale',gamma,'BoxConstraint',C);
-            SVMModel=fitcecoc(Xtrain,labels,'Coding','onevsone','Learners',T);
-            
+           T=templateSVM('KernelFunction','gaussian','Standardize' ,true,'KernelScale',gamma,'BoxConstraint',C);
+           SVMModel=fitcecoc(X,labels,'Coding','onevsone','Learners',T);
+           
         end
         
         function resClass = recognize(obj,emgData)
             % window for computing features
-            window = 200;
-            if ( size(emgData,1) > window )
-                emgData = emgData(end-window+1:end,:);
+            window = 500;
+            if ( size(emgData,1) > 500 )
+                emgData = emgData(end:end-window+1,:);
             end
             feature = emgClassifier.extractFeatures(emgData);
             resClass = predict(obj.model,feature);
         end
         
     end
-    
+     
     methods(Static)
-        function features = extractFeatures(sample)
+         function features = efeatures(sample)
             % include different feature extraction methods here.
             % 
+            
             method = 1;
             switch method
                 case 1
@@ -97,10 +105,10 @@ classdef emgClassifier < handle
             
         end
         function trainData = importTrainData(userName)
-            filepath1 = ['/data/' userName '/fist.csv'];
-            filepath2 = ['/data/' userName '/point.csv'];
-            filepath3 = ['/data/' userName '/wrist_flex.csv'];
-            filepath4 = ['/data/' userName '/wrist_extend.csv'];
+            filepath1 = ['\data\' userName '\fist.csv'];
+            filepath2 = ['\data\' userName '\point.csv'];
+            filepath3 = ['\data\' userName '\wrist_flex.csv'];
+            filepath4 = ['\data\' userName '\wrist_extend.csv'];
             % the data file should be csv file whose first line are
             % variable names, which are seqN, channel1, channel2, channel3 and
             % channel4. seqN will be read as row names
@@ -108,11 +116,16 @@ classdef emgClassifier < handle
             data2 = readtable(filepath2);
             data3 = readtable(filepath3);
             data4 = readtable(filepath4);
+            
+            data1 = adc2emg(data1{:,:});
+            data2 = adc2emg(data2{:,:});
+            data3 = adc2emg(data3{:,:});
+            data4 = adc2emg(data4{:,:});
+            
             trainData = {data1;data2;data3;data4};
         end
         function model = loadModel(userName)
-            read = load(['/data/' userName '/model/SVMmodel.mat']);
-            model = read.SVMModel;
+            model = load(['/data/' userName '/model/SVMmodel.mat']);
         end
     end
     
