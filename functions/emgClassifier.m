@@ -41,7 +41,33 @@ classdef emgClassifier < handle
                 features{i} = cellfun(@extractFeatures,samples{i});
             end
             
+           ffist = features{1,1};
+           fpoint = features{2,1};
+           fwristf = features{3,1};
+           fwriste = features{4,1};
+           
+           % We keep Channel 1-4
+           ffist = ffist(:,2:5);
+           fpoint = fpoint(:,2:5);
+           fwristf = fwristf(:,2:5);
+           fwriste = fwriste(:,2:5);
+           
+           lf=height(ffist);
+           lp= height(fpoint);
+           lwf= height(fwristf);
+           lwe= height(fwriste);
+           
+           X=[ffist;fpoint;fwristf;fwriste];
+           labels = [ones(lf,1);2*ones(lp,1);3*ones(lwf,1);4*ones(lwe,1)];
+           
+           gamma=1;
+           C=1;
+           
+           T=templateSVM('KernelFunction','gaussian','Standardize' ,true,'KernelScale',gamma,'BoxConstraint',C);
+           SVMModel=fitcecoc(Xtrain,labels,'Coding','onevsone','Learners',T);
+           
         end
+        
         function resClass = recognize(obj,emgData)
             % window for computing features
             window = 500;
@@ -71,17 +97,17 @@ classdef emgClassifier < handle
             
         end
         function trainData = importTrainData(userName)
-            filepath1 = ['/data/' userName '/fist.csv'];
-            filepath2 = ['/data/' userName '/point.csv'];
-            filepath3 = ['/data/' userName '/wrist_flex.csv'];
-            filepath4 = ['/data/' userName '/wrist_extend.csv'];
+            filepath1 = ['\functions\fist.xlsx'];
+            filepath2 = ['\functions\point.xlsx'];
+            filepath3 = ['\functions\wrist_flex.xlsx'];
+            filepath4 = ['\functions\wrist_extend.xlsx'];
             % the data file should be csv file whose first line are
             % variable names, which are seqN, channel1, channel2, channel3 and
             % channel4. seqN will be read as row names
-            data1 = readtable(filepath1,'ReadRowNames',true);
-            data2 = readtable(filepath2,'ReadRowNames',true);
-            data3 = readtable(filepath3,'ReadRowNames',true);
-            data4 = readtable(filepath4,'ReadRowNames',true);
+            data1 = readtable(filepath1);
+            data2 = readtable(filepath2);
+            data3 = readtable(filepath3);
+            data4 = readtable(filepath4);
             trainData = {data1;data2;data3;data4};
         end
         function model = loadModel(userName)
