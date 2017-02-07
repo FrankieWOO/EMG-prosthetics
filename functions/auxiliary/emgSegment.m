@@ -18,8 +18,8 @@ function [ segments ] = emgSegment( data )
     emg_mavg = tsmovavg(emg_savg,'s',window,1);
     emg_rect = emg_mavg.*(emg_mavg > thredshold);
     
-    flag_start = zeros(length(emg_rect),0); 
-    flag_end = zeros(length(emg_rect),0); 
+    flag_start = zeros(length(emg_rect),1); 
+    flag_end = zeros(length(emg_rect),1); 
     flag_seg = 0;
     for i=1:length(emg_rect)
         if(flag_seg ==0 )
