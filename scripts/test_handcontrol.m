@@ -5,8 +5,10 @@ userName = 'Fan';   % put the user's name here
 handControlObj = handControl(userName);
 % start realtime processing
 start(handControlObj)
-% stop realtime processing
+
+%% stop realtime processing
 stop(handControlObj)
 %%
 % delete the object when finish
 delete(handControlObj)
+clear('handControlObj')

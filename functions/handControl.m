@@ -28,17 +28,17 @@ classdef handControl < handle
             prepareModel(classifierObj);
             
             % create serialport object
-            obj.serialObj = serial('COM1');
+            obj.serialObj = serial('COM9');
         end
         
         function initializeReading(obj)
             try
-                obj.dataFeed = Bitalino('BITalino-15-11');
+                obj.dataFeed = Bitalino('BITalino-15-23');
                 disp('Connection to Bitalino established')
             catch
                 error('Connection to Bitalino failed!');
             end
-            obj.timerObj = timer('TimerFcn',@(~,~)timerFcn_callback(obj),'Period',0.5, ...
+            obj.timerObj = timer('TimerFcn',@(~,~)timerFcn_callback(obj),'Period',0.1, ...
                  'ExecutionMode','FixedRate','BusyMode','drop');
             obj.emgMonitor = EmgMonitorApp;
             obj.ch1Plot = plot(obj.emgMonitor.ch1Axes,0);
@@ -58,6 +58,7 @@ classdef handControl < handle
         function start(obj)
             % start live streaming of Bitalino
             startBackground(obj.dataFeed);
+            fopen(obj.serialObj);
             % start timer
             start(obj.timerObj);
             set(obj.ch1Plot,'XData',1,'YData',0);
@@ -67,7 +68,7 @@ classdef handControl < handle
             refreshdata;
             drawnow;
             % open serial
-            fopen(obj.serialObj);
+            
         end
         
         function stop(obj)
@@ -113,8 +114,9 @@ classdef handControl < handle
             
             % use classifier to output gesture class
             emgData = [obj.ch1Data obj.ch2Data obj.ch3Data obj.ch4Data];
-            class_predict = classifierObj.recognize(emgData);
             
+            %class_predict = classifierObj.recognize(emgData);
+            class_predict = 1;
             % if the event of gesture changing happens, trigger the event
             % to send command to serial port; or use another timer to
             % execute command
