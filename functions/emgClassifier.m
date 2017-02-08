@@ -5,7 +5,7 @@ classdef emgClassifier < handle
     properties
         userName;   % name of the user
         model;  % the trained model
-        trigger_thredshold;
+        triggerThredshold;
     end
     
     methods
@@ -15,19 +15,24 @@ classdef emgClassifier < handle
         end
         function prepareModel(obj)
             try
-                obj.model = emgClassifier.loadModel(obj.userName);
+                %obj.model = emgClassifier.loadModel(obj.userName);
+                read = load(['data/' obj.userName '/model/SVMmodel.mat']);
+                obj.model = read.SVMModel;
+                
+                % load trigger thredshold
+                % better to add a calibration procedure
+                % ...
+                obj.triggerThredshold = read.trigger_thredshold;
             catch
                 error('loading model failed');
                 % train the model
                 % ...
             end
-            
-            % calculate trigger thredshold
-            % better to add a calibration procedure
-            % ...
-            
         end
         function trainSVM(obj)
+            
+            window_analysis = 200;
+            silent_length = 2000;
             % import train dataset, which is a cell array, each cell is a
             % datatable for one action
             trainData = emgClassifier.importTrainData(obj.userName);
@@ -71,12 +76,17 @@ classdef emgClassifier < handle
             
             T=templateSVM('KernelFunction','gaussian','Standardize' ,true,'KernelScale',gamma,'BoxConstraint',C);
             SVMModel=fitcecoc(X,labels,'Coding','onevsone','Learners',T);
+            obj.model = SVMModel;
             
             % calculate the trigger_thredshold
+            emg_savg = mean(trainData{1}(1:silent_length,:).^2,2)^0.5;
+            emg_mavg = tsmovavg(emg_savg,'s',window_analysis,1);
+            trigger_thredshold = prctile(emg_mavg(window_analysis:end),95);
+            obj.triggerThredshold = trigger_thredshold;
             
-            
+            % save file
             path2save = ['data/' obj.userName '/model/SVMmodel.mat'];
-            save(path2save,'SVMModel');
+            save(path2save,'SVMModel','trigger_thredshold');
             
         end
         
@@ -88,8 +98,8 @@ classdef emgClassifier < handle
                 emgData = emgData(end-window_analysis+1:end,:);
             end
             emg_savg = mean(emgData.^2,2).^0.5; % root mean of squared value
-            % root mean of squared
-            if (mean(emg_savg.^2,1)^0.5 <= obj.trigger_thredshold)
+            % mean in the analysis window
+            if (mean(emg_savg,1) <= obj.triggerThredshold)
                 resClass = 0;
                 return
             end
