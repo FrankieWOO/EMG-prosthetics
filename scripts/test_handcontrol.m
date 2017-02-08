@@ -2,7 +2,7 @@
 % created by Fan on 2/2/2017
 % create handControl object
 userName = 'Fan';   % put the user's name here
-handControlObj = handControl(userName);
+handControlObj = handControl(userName,'BITalino-15-11','COM');
 % start realtime processing
 start(handControlObj)
 
