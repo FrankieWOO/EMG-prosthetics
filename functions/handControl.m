@@ -16,10 +16,13 @@ classdef handControl < handle
         ch3Data;
         ch4Data;
         userName;
+        gestureClass;
+        btName; % EMG device name
+        serialport;
     end
     
     methods
-        function obj = handControl(userName)
+        function obj = handControl(userName,btName,serialport)
             initializeReading(obj);
             obj.userName = userName;
             classifierObj = emgClassifier(userName);
@@ -28,7 +31,10 @@ classdef handControl < handle
             prepareModel(classifierObj);
             
             % create serialport object
-            obj.serialObj = serial('COM9');
+            obj.serialObj = serial(serialport);
+            obj.gestureClass = 0;
+            obj.btName = btName;
+            obj.serialport = serialport;
         end
         function delete(obj)
             delete(obj.dataFeed);
@@ -39,7 +45,7 @@ classdef handControl < handle
         
         function initializeReading(obj)
             try
-                obj.dataFeed = Bitalino('BITalino-15-11');
+                obj.dataFeed = Bitalino(obj.btName);
                 disp('Connection to Bitalino established')
             catch
                 error('Connection to Bitalino failed!');
