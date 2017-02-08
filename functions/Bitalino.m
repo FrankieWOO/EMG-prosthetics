@@ -487,7 +487,8 @@ classdef Bitalino < handle
             % Enable streaming of data from the device
             % 253 = 0b11111101 - live 6 analog channels
             % 254 = 0b11110110 - simulated 6 analog channels
-            write(obj,253);
+            % 61 = 00111101
+            write(obj,61);
         end
         
         %% Set the internal property numBytesPerRead

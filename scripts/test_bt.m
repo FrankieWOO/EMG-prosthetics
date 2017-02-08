@@ -11,14 +11,17 @@ btinfo.RemoteIDs
 %instrhwinfo('bluetooth','BITalino-15-11')
 
 
-b = Bitalino('BITalino-15-11'); % create Bitalino object given remoteName
-startBackground(b) % start background data streaming
-
-b.AvailableSamples % show the number of available samples in buffer
+bt = Bitalino('BITalino-15-11',100); % create Bitalino object given remoteName
+%%
+startBackground(bt) % start background data streaming
+tic
+%%
+bt.AvailableSamples % show the number of available samples in buffer
 % read data from raw dataFrame, columns of data are...resorted, 4 chanels 
 % start from 6th to 9th 
-data = read(b); 
-
-stopBackground(b) % stop background data streaming
-
-delete(b) % delete object
+data2 = read(bt); 
+toc
+%%
+stopBackground(bt) % stop background data streaming
+%%
+delete(bt) % delete object

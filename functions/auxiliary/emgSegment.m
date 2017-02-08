@@ -5,11 +5,11 @@ function [ segments ] = emgSegment( data )
 %   created by Fan on 4/2/2017
 %   segmentation method refers to Wang2007, An Adaptive Feature Extractor
 %   for Gesture SEMG Recognition
-    window_ma = 50;    %sliding window for moving average
+    window_ma = 50*obj.sampleRate/1000;    %sliding window for moving average
     trigger_thredshold = 0.0001;   %set default thredshold value to select segment
-    window_analysis = 200; % 200ms assuming sampling rate is 1000Hz
-    contraction_length = 900;
-    silent_length = 2000; 
+    window_analysis = 200*obj.sampleRate/1000; % 200ms assuming sampling rate is 1000Hz
+    contraction_length = 900*obj.sampleRate/1000;
+    silent_length = 2000*obj.sampleRate/1000; 
     
     if (istable(data))
         data_mat = table2array(data);
@@ -22,7 +22,8 @@ function [ segments ] = emgSegment( data )
     emg_savg = mean(data_mat.^2,2).^0.5; % root mean of squared value
     emg_mavg = tsmovavg(emg_savg,'s',window_ma,1);
     trigger_thredshold = prctile(emg_savg(window_ma:silent_length),95);
-    disp(['trigger thredshold of EMG signal is:' trigger_thredshold]);
+    disp('trigger thredshold of EMG signal is:')
+        disp(trigger_thredshold);
     emg_rect = emg_mavg.*(emg_mavg > trigger_thredshold);
     
     flag_start = zeros(length(emg_rect),1); 

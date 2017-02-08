@@ -19,22 +19,26 @@ classdef handControl < handle
         gestureClass;
         btName; % EMG device name
         serialport;
+        classifierObj;
+        sampleRate = 100;
     end
     
     methods
         function obj = handControl(userName,btName,serialport)
+            obj.btName = btName;
+            obj.serialport = serialport;
+            
             initializeReading(obj);
             obj.userName = userName;
-            classifierObj = emgClassifier(userName);
+            obj.classifierObj = emgClassifier(userName);
             % prepare the trained model, if model not exist, train it if
             % have data
-            prepareModel(classifierObj);
+            prepareModel(obj.classifierObj);
             
             % create serialport object
             obj.serialObj = serial(serialport);
             obj.gestureClass = 0;
-            obj.btName = btName;
-            obj.serialport = serialport;
+            
         end
         function delete(obj)
             delete(obj.dataFeed);
@@ -45,7 +49,7 @@ classdef handControl < handle
         
         function initializeReading(obj)
             try
-                obj.dataFeed = Bitalino(obj.btName);
+                obj.dataFeed = Bitalino(obj.btName,100);
                 disp('Connection to Bitalino established')
             catch
                 error('Connection to Bitalino failed!');
@@ -127,7 +131,7 @@ classdef handControl < handle
             % use classifier to output gesture class
             emgData = [obj.ch1Data obj.ch2Data obj.ch3Data obj.ch4Data];
             
-            class_predict = classifierObj.recognize(emgData);
+            class_predict = obj.classifierObj.recognize(emgData);
             
             % if the event of gesture changing happens, trigger the event
             % to send command to serial port; or use another timer to

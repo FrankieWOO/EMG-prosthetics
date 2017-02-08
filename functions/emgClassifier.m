@@ -6,6 +6,7 @@ classdef emgClassifier < handle
         userName;   % name of the user
         model;  % the trained model
         triggerThredshold;
+        sampleRate = 100;
     end
     
     methods
@@ -31,8 +32,8 @@ classdef emgClassifier < handle
         end
         function trainSVM(obj)
             
-            window_analysis = 200;
-            silent_length = 2000;
+            window_analysis = 200*obj.sampleRate/1000;
+            silent_length = 2000*obj.sampleRate/1000;
             % import train dataset, which is a cell array, each cell is a
             % datatable for one action
             trainData = emgClassifier.importTrainData(obj.userName);
@@ -79,7 +80,7 @@ classdef emgClassifier < handle
             obj.model = SVMModel;
             
             % calculate the trigger_thredshold
-            emg_savg = mean(trainData{1}(1:silent_length,:).^2,2)^0.5;
+            emg_savg = mean(table2array(trainData{1}(1:silent_length,:)).^2,2).^0.5;
             emg_mavg = tsmovavg(emg_savg,'s',window_analysis,1);
             trigger_thredshold = prctile(emg_mavg(window_analysis:end),95);
             obj.triggerThredshold = trigger_thredshold;
@@ -92,19 +93,22 @@ classdef emgClassifier < handle
         
         function resClass = recognize(obj,emgData)
             % window for computing features
-            window_analysis = 200;
+            window_analysis = 200*obj.sampleRate/1000;
             
             if ( size(emgData,1) > window_analysis )
                 emgData = emgData(end-window_analysis+1:end,:);
             end
             emg_savg = mean(emgData.^2,2).^0.5; % root mean of squared value
+            feature = emgClassifier.extractFeatures(emgData);
+            resClass = predict(obj.model,feature);
+            disp('class predicted:')
+            disp(resClass)
             % mean in the analysis window
             if (mean(emg_savg,1) <= obj.triggerThredshold)
                 resClass = 0;
-                return
             end
-            feature = emgClassifier.extractFeatures(emgData);
-            resClass = predict(obj.model,feature);
+            
+            
         end
         
     end
