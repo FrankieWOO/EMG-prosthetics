@@ -9,7 +9,7 @@ javaaddpath(fullfile('/lib'));
 mac = '201607181511';
 SamplingRate = 1000;
 analogChannels = [0 1 2 3];
-nSamples = 5000;
+nSamples = 100;
 
 bit = bitalino();
 
@@ -20,19 +20,22 @@ bit = bit.open(mac,SamplingRate);
 if bit.connection
     % get bitalino version
     bit.version();
-    pause(2);
+    pause(0.5);
     %start acquisition on channel A4
     bit = bit.start(analogChannels);
-    tic
     disp('Start Acquisition')
+    pause(0.1);
+    tic
+    n = bit.iStream.available()/7;
     % read samples
-    data = bit.read(nSamples);
+    data = bit.read(n);
+    toc
     disp('Data read')
     %stop acquisition
     bit.stop();
-    toc
+    
     %plot channel acquired
-    plot(data(6,:))
+    %plot(data(6,:))
 end
 
 %%

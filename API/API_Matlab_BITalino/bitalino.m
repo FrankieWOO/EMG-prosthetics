@@ -270,7 +270,8 @@ classdef bitalino
             end
             
             %get Data according to the value nSamples set
-            dataAcquired = zeros(5+nChannels,nSamples);
+            %dataAcquired = zeros(5+nChannels,nSamples);
+            dataAcquired = zeros(nSamples,5+nChannels);
             Data = [];
             sampleIndex = 1;
             bTemp = javaArray('java.lang.Byte', 1);
@@ -279,9 +280,10 @@ classdef bitalino
                     bTemp = self.iStream.read();
                     Data = cat(2,Data,bTemp);
                 end
+                % decoded is a column vector
                 decoded = javaMethod('main',self.decode,Data,self.number_bytes,nChannels);
                 if (size(decoded,2) ~= 0)
-                    dataAcquired(:,sampleIndex) = transpose(decoded);
+                    dataAcquired(sampleIndex,:) = decoded;
                     Data = [];
                     sampleIndex = sampleIndex+1;
                 else
@@ -298,5 +300,4 @@ classdef bitalino
         end
         
     end
-end
-    
+end    
