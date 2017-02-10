@@ -1,15 +1,23 @@
 
-dataRecordApp
 
+userName = 'Fan';
+samplingRate = 100;
 %%
 
-userName = 'Sam';   % put the user's name here
-classifierObj = emgClassifier(userName);
+dataRecordApp
+
+%% run dataprocess procedures
+
+
+%% train model
+
+   % put the user's name here
+classifierObj = emgClassifier(userName,samplingRate);
 trainSVM(classifierObj)
 
 %%
 mac = '201607181511';
-handControlObj = handControl(userName,mac,'COM7');
+handControlObj = handControl(userName,mac,'COM7',100);
 % start realtime processing
 
 %%
@@ -17,8 +25,8 @@ handControlObj = handControl(userName,mac,'COM7');
 start(handControlObj)
 
 %% stop realtime processing
-%stop(handControlObj)
+stop(handControlObj)
 %%
 % delete the object when finish
-%delete(handControlObj)
-%clear('handControlObj')
+delete(handControlObj)
+clear('handControlObj')

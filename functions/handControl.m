@@ -19,7 +19,7 @@ classdef handControl < handle
         btName; % EMG device name
         serialport;
         classifierObj;
-        sampleRate = 1000;
+        sampleRate = 100;
         nSample = 200;
         mac;
         plotting = false;
@@ -29,20 +29,24 @@ classdef handControl < handle
     end
     
     methods
-        function obj = handControl(userName,mac,serialport)
+        function obj = handControl(userName,mac,serialport,sampleRate)
             %obj.btName = btName;
             obj.mac = mac;
             obj.serialport = serialport;
             obj.dataFeed = bitalino();
-            
-            
+            obj.sampleRate = sampleRate;
+            obj.nSample = 200*sampleRate/1000;
             try
                 obj.dataFeed = obj.dataFeed.open(obj.mac,obj.sampleRate);
-                disp('Connection to Bitalino established')
+                if (obj.dataFeed.connection == 1)
+                disp('Bitalino is open')
+                else
+                    disp('connection has problem')
+                end
             catch
-                error('Connection to Bitalino failed!');
+                error('Open Bitalino failed!');
             end
-            obj.timerObj = timer('TimerFcn',@(~,~)timerFcn_callback(obj),'Period',0.1, ...
+            obj.timerObj = timer('TimerFcn',@(~,~)timerFcn_callback(obj),'Period',0.2, ...
                  'ExecutionMode','FixedRate','BusyMode','drop');
              
             if (obj.plotting == true) 
@@ -62,7 +66,7 @@ classdef handControl < handle
             end
             
             obj.userName = userName;
-            obj.classifierObj = emgClassifier(userName);
+            obj.classifierObj = emgClassifier(userName,sampleRate);
             % prepare the trained model, if model not exist, train it if
             % have data
             prepareModel(obj.classifierObj);
@@ -73,7 +77,7 @@ classdef handControl < handle
             
         end
         function delete(obj)
-            delete(obj.dataFeed);
+            %delete(obj.dataFeed);
             delete(obj.serialObj);
             delete(Obj.timerObj);
             
@@ -148,7 +152,11 @@ classdef handControl < handle
             % if the event of gesture changing happens, trigger the event
             % to send command to serial port; or use another timer to
             % execute command
-            fwrite(obj.serialObj,class_predict);
+            if(obj.gestureClass~=class_predict)
+                fwrite(obj.serialObj,num2str(class_predict),'uchar');
+                obj.gestureClass = class_predict;
+                pause(6);
+            end
         end
         
     end

@@ -5,14 +5,15 @@ classdef emgClassifier < handle
     properties
         userName;   % name of the user
         model;  % the trained model
-        triggerThredshold;
+        %triggerThredshold;
         sampleRate = 100;
     end
     
     methods
-        function obj = emgClassifier(name)
+        function obj = emgClassifier(name,sampleRate)
             obj.userName = name;
             %obj.model = [];
+            obj.sampleRate = sampleRate;
         end
         function prepareModel(obj)
             try
@@ -23,9 +24,9 @@ classdef emgClassifier < handle
                 % load trigger thredshold
                 % better to add a calibration procedure
                 % ...
-                obj.triggerThredshold = read.trigger_thredshold;
+                %obj.triggerThredshold = read.trigger_thredshold;
             catch
-                error('loading model failed');
+                error('loading model failed, please train the model');
                 % train the model
                 % ...
             end
@@ -41,7 +42,7 @@ classdef emgClassifier < handle
             if (segmented == false)
                 % do segmentation using auto TH
                 window_analysis = 200*obj.sampleRate/1000;
-                silent_length = 2000*obj.sampleRate/1000;
+                %silent_length = 2000*obj.sampleRate/1000;
                 % import train dataset, which is a cell array, each cell is a
                 % datatable for one action
                 trainData = emgClassifier.importTrainData(obj.userName);
@@ -56,7 +57,8 @@ classdef emgClassifier < handle
             else
                 % load segments
                 for i = 1:nClass
-                    samples(i) = load(['data/' obj.userName '/train/' labelnames.class{i} '.mat'],segments);
+                    variables_read = load(['data/' obj.userName '/train/' labelnames.class{i} '.mat'],'segments');
+                    samples{i}=variables_read.segments;
                 end
             end
             
@@ -65,7 +67,7 @@ classdef emgClassifier < handle
             featureMatrix = []; labelVector = [];
             for i = 1:nClass
                 features{i,1} = cellfun(@emgClassifier.extractFeatures,samples{i,1},'UniformOutput',false);
-                featureMatrix = cat(1,featureMatrix,features{i,1});
+                featureMatrix = cat(1,featureMatrix,cell2mat(features{i,1}));
                 labelVector = cat(1,labelVector,labelnames.label(i)*ones(size(features{i},1),1));
             end
                        
@@ -102,16 +104,16 @@ classdef emgClassifier < handle
             SVMModel=fitcecoc(featureMatrix,labelVector,'Coding','onevsone','Learners',T);
             obj.model = SVMModel;
             
-            % calculate the trigger_thredshold
-            emg_savg = mean(table2array(trainData{1}(1:silent_length,:)).^2,2).^0.5;
-            emg_mavg = tsmovavg(emg_savg,'s',window_analysis,1);
-            trigger_thredshold = prctile(emg_mavg(window_analysis:end),95);
-            obj.triggerThredshold = trigger_thredshold;
-            
+%             % calculate the trigger_thredshold
+%             emg_savg = mean(table2array(trainData{1}(1:silent_length,:)).^2,2).^0.5;
+%             emg_mavg = tsmovavg(emg_savg,'s',window_analysis,1);
+%             trigger_thredshold = prctile(emg_mavg(window_analysis:end),95);
+%             obj.triggerThredshold = trigger_thredshold;
+%             
             % save file
             path2save = ['data/' obj.userName '/model/SVMmodel.mat'];
-            save(path2save,'SVMModel','trigger_thredshold');
-            
+            save(path2save,'SVMModel');
+            disp('SVM model train done')
         end
         
         function resClass = recognize(obj,emgData)
@@ -127,9 +129,9 @@ classdef emgClassifier < handle
             disp('class predicted:')
             disp(resClass)
             % mean in the analysis window
-            if (mean(emg_savg,1) <= obj.triggerThredshold)
-                resClass = 0;
-            end
+%             if (mean(emg_savg,1) <= obj.triggerThredshold)
+%                 resClass = 0;
+%             end
             
             
         end
