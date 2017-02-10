@@ -110,8 +110,10 @@ classdef handControl < handle
             if nData == 0
                 disp('no data read. wait, restart or check connection')
             end
+            rawData_analog = rawData(:,6:end);
+            rawData_analog(rawData_analog == -1) = 511.5;
             % convert adc data to emg data (mV)
-            emgData = adc2emg(rawData(:,6:end));
+            emgData = adc2emg(rawData_analog);
             
             if (obj.plotting == true)
                 ch1Data_new = adc2emg(rawData(:,6));

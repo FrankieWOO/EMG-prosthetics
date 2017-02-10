@@ -1,0 +1,6 @@
+class	label
+relax	0
+fist	1
+point	2
+wrist_flexion	3
+wrist_extension	4
