@@ -152,10 +152,12 @@ classdef handControl < handle
             % if the event of gesture changing happens, trigger the event
             % to send command to serial port; or use another timer to
             % execute command
-            if(obj.gestureClass~=class_predict)
+            if(obj.gestureClass~=class_predict && class_predict~=0)
+                
                 fwrite(obj.serialObj,num2str(class_predict),'uchar');
                 obj.gestureClass = class_predict;
                 pause(6);
+                
             end
         end
         

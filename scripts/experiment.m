@@ -1,6 +1,6 @@
 
 
-userName = 'Fan';
+userName = 'S1';
 samplingRate = 100;
 %%
 
