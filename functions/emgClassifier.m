@@ -31,6 +31,51 @@ classdef emgClassifier < handle
                 % ...
             end
         end
+        function optimizeSVM(obj,segmented)
+            
+            if( nargin==1)
+                segmented = true;
+            end
+            labelnames = readtable(['data/' obj.userName '/model/labelnames.txt']);
+            labelnames = labelnames(1:5,:);
+            nClass = size(labelnames,1);
+            samples = cell(nClass,1);
+            if (segmented == false)
+                % do segmentation using auto TH
+                window_analysis = 200*obj.sampleRate/1000;
+                %silent_length = 2000*obj.sampleRate/1000;
+                % import train dataset, which is a cell array, each cell is a
+                % datatable for one action
+                trainData = emgClassifier.importTrainData(obj.userName);
+                % segment the time series data into samples
+                % samples are cell array where each cell is a sample
+                % represented by a matrix
+                data0 = trainData{1};
+                data0_savg = mean(data0.^2,2).^0.5;
+                data0_mavg = tsmovavg(data0_savg,'s',window_analysis,1);
+                trigger_thredshold = prctile(data0_mavg(window_analysis:end),99);
+                samples = cellfun(@emgSegment,trainData(2:end,1),num2cell(trigger_thredshold*ones(4,1)),'UniformOutput',false);
+            else
+                % load segments
+                for i = 1:nClass
+                    variables_read = load(['data/' obj.userName '/train/' labelnames.class{i} '.mat'],'segments');
+                    samples{i}=variables_read.segments;
+                end
+            end
+     
+            features = cell(nClass,1);
+            for i = 1:nClass
+                features{i,1} = cellfun(@emgClassifier.extractFeatures,samples{i,1},'UniformOutput',false);
+                %featureMatrix = cat(1,featureMatrix,cell2mat(features{i,1}));
+             end
+                [trainingaccuracy,testingaccuracy] = parameteropt(features,labelnames);
+                columnlabel = 'C=0.001 C=0.01 C=0.1 C=1 C=10 C=100 C=1000';
+                rowlabel= 'g=0.001 g=0.01 g=0.1 g=1 g=10 g=100 g=1000'; % g for gamma
+                printmat(trainingaccuracy,'Training Accuracy', rowlabel, columnlabel)
+                printmat(testingaccuracy,'Training Accuracy', rowlabel, columnlabel)
+                disp('Now Select gamma (g) and C that has the best testing and training accuracy, and manually change values in trainSVM Function')
+
+        end
         function trainSVM(obj,segmented)
             
             if( nargin==1)
