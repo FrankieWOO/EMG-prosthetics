@@ -18,6 +18,6 @@ for angle = 0.2:0.1:0.8 % The area is between 0 and 1. According to the 3D-hand 
     pause(2); % Pause 2 seconds.
 end
 
-%% Close all (COM 
+%% Close all (COM)
 %delete(instrfindall);
 %clear s a
