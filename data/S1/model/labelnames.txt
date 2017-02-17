@@ -4,3 +4,5 @@ fist	1
 point	2
 wrist_extension	3
 wrist_flexion	4
+wrist_pronation 5
+wrist_supination 6
