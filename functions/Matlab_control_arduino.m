@@ -8,7 +8,8 @@ index = servo(a,'D10','MinPulseDuration',1*10^-3,'MaxPulseDuration',2*10^-3); % 
 middle = servo(a,'D3','MinPulseDuration',1*10^-3,'MaxPulseDuration',2*10^-3);% The values of Max and Min are based on datasheet.
 thumb = servo(a,'D9','MinPulseDuration',1*10^-3,'MaxPulseDuration',2*10^-3); 
 %% Operations
-for angle = 0.2:0.1:0.8 % The area is between 0 and 1. According to the 3D-hand in lab, it should between 0.2 and 0.8.Thumb is arround 0.4 and 0.6, the structure seems has some problem.
+for angle = 0.2:0.1:0.8 % The area is between 0 and 1. According to the 3D-hand in lab, it should between 0.2 and 0.8.
+                        % Thumb is arround 0.4 and 0.6, the structure seems has some problem.
     writePosition(middle,angle); % Drive the motors.
     current_pos=readPosition(middle);
     current_pos=current_pos*100 +160; 
