@@ -1,6 +1,7 @@
 % Control the actuator by Matlab
-   %Noticing: this program is suggested not to run directly.
-   %The specific tutorial can be acquired by searching 'Control Servo Motors' in Mathwork.
+   % Install the support package first. (https://cn.mathworks.com/matlabcentral/fileexchange/47522?download=true)
+   % Noticing: this program is suggested not to run directly.
+   % The specific tutorial can be acquired by searching 'Control Servo Motors' in Mathwork.
 
 %% Initialization 
 a = arduino('COM9','uno'); % Connecting with the Arduinoboard.
