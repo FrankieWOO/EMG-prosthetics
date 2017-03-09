@@ -8,7 +8,7 @@ function [ segments ] = emgSegment( data,method, TH ,sampleRate)
     
     %trigger_thredshold = 0.0001;   %set default thredshold value to select segment
     %window_analysis = 200*obj.sampleRate/1000; % 200ms assuming sampling rate is 1000Hz
-    contraction_length = 1000*sampleRate/1000;
+    min_contraction_length = 1000*sampleRate/1000;
     %silent_length = 2000*obj.sampleRate/1000; 
     
     if (istable(data))
@@ -57,20 +57,24 @@ function [ segments ] = emgSegment( data,method, TH ,sampleRate)
            segments{j} =  data_mat(ind_start(j):ind_end(j),:);
         end
     elseif (strcmp(method,'wave'))
+        window_ma = 1500*sampleRate/1000;    %sliding window for moving average
+        emg_mavg = msavg(data_mat,window_ma);
+        
         
     end
     selection_method = 1;
     switch selection_method
         case 1
-            % if segment length less than contraction_length, abandon it
+            % if segment length less than min_contraction_length, abandon it
             for m=nSample:-1:1
-                if (size(segments{m},1)<contraction_length)
+                if (size(segments{m},1)<min_contraction_length)
                 segments(m)=[];
                 end
             end
         
         case 2
             % use analysis window to segment data
+            
     end
     
 end
